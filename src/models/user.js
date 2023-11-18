@@ -1,0 +1,72 @@
+module.exports = (Sequelize, DataTypes) => {
+  const User = Sequelize.define(
+    "User",
+    {
+      firstName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true
+        }
+      },
+      lastName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true
+        }
+      },
+      email: {
+        type: DataTypes.STRING,
+        validate: {
+          isEmail: true
+        }
+      },
+      mobile: {
+        type: DataTypes.STRING,
+        validate: {
+          is: /^[0-9]{10}$/
+        }
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      profileImage: DataTypes.STRING,
+      coverImage: DataTypes.STRING,
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      }
+    },
+    { underscored: true }
+  );
+
+  User.associate = db => {
+    User.hasMany(db.Post, {
+      foreignKey: {
+        name: "userId",
+        allowNull: false
+      },
+      onDelete: "RESTRICT"
+    });
+
+    User.hasMany(db.Comment, {
+      foreignKey: {
+        name: "userId",
+        allowNull: false
+      },
+      onDelete: "RESTRICT"
+    });
+
+    User.hasMany(db.Like, {
+      foreignKey: {
+        name: "userId",
+        allowNull: false
+      },
+      onDelete: "RESTRICT"
+    });
+  };
+
+  return User;
+};
