@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notEmpty: true
         }
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: false
       }
     },
     { underscored: true }
@@ -45,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Post.belongsTo(db.Tag, {
       foreignKey: {
-        name: "TagId",
+        name: "tagId",
         allowNull: false
       },
       onDelete: "RESTRICT"

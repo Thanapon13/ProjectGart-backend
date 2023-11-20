@@ -1,6 +1,6 @@
 // const { sequelize } = require("./models");
-// sequelize.sync({ force: true });
-// // sequelize.sync({ alter: true });
+// // sequelize.sync({ force: true });
+// sequelize.sync({ alter: true });
 
 require("dotenv").config();
 const express = require("express");
@@ -11,8 +11,11 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const notFoundMiddleware = require("./middlewares/not-found");
 const errorMiddleware = require("./middlewares/error");
+const authenticateMiddleware = require("./middlewares/authenticate");
 
 const authRoute = require("./routes/auth-route");
+const userRoute = require("./routes/user-route");
+const createPost = require("./routes/createPost-route");
 
 const app = express();
 
@@ -30,6 +33,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRoute);
+app.use("/user", authenticateMiddleware, userRoute);
+app.use("/post", createPost);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

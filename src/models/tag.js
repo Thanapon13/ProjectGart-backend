@@ -14,9 +14,9 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Tag.associate = db => {
-    Tag.belongsTo(db.Post, {
+    Tag.hasMany(db.Post, {
       foreignKey: {
-        name: "PostId",
+        name: "tagId",
         allowNull: false
       },
       onDelete: "RESTRICT"
