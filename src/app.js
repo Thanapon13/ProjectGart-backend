@@ -15,7 +15,8 @@ const authenticateMiddleware = require("./middlewares/authenticate");
 
 const authRoute = require("./routes/auth-route");
 const userRoute = require("./routes/user-route");
-const createPost = require("./routes/createPost-route");
+const postRoute = require("./routes/createPost-route");
+const tagRoute = require("./routes/tag-route");
 
 const app = express();
 
@@ -34,8 +35,8 @@ app.use(express.json());
 
 app.use("/auth", authRoute);
 app.use("/user", authenticateMiddleware, userRoute);
-app.use("/post", createPost);
-
+app.use("/post", postRoute);
+app.use("/tag", authenticateMiddleware, tagRoute);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
