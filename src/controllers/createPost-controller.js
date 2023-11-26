@@ -4,6 +4,9 @@ const { Post, User, Tag } = require("../models");
 
 exports.createPost = async (req, res, next) => {
   try {
+    console.log("req.body:", req.body);
+    console.log("req.files:", req.files);
+
     if (!req.files || !req.files.image || req.files.image.length === 0) {
       return res.status(400).json({ message: "Post image is required" });
     }
@@ -36,7 +39,10 @@ exports.getCreatePost = async (req, res, next) => {
       attributes: ["id", "title", "description", "image"],
       include: [
         { model: Tag, attributes: ["TagName"] },
-        { model: User, attributes: ["firstName", "lastName", "id", "email"] }
+        {
+          model: User,
+          attributes: ["firstName", "lastName", "id", "email", "profileImage"]
+        }
       ]
     });
 
@@ -47,6 +53,20 @@ exports.getCreatePost = async (req, res, next) => {
     console.log("pureCreatePost:", pureCreatePost);
 
     res.status(201).json({ pureCreatePost });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getPostImageById = async (req, res, next) => {
+  const userId = req.params.userId;
+  try {
+    let postImageById = await Post.findAll({
+      attributes: ["image", "id"],
+      where: { userId: userId }
+    });
+
+    res.status(201).json({ postImageById });
   } catch (err) {
     next(err);
   }
