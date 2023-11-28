@@ -19,10 +19,6 @@ router.post(
 
 router.get("/getCreatePost", createPostController.getCreatePost);
 
-router.get(
-  "/getPostImageById/:userId",
-  authenticateMiddleware,
-  createPostController.getPostImageById
-);
+router.get("/getPostImageById/:userId", createPostController.getPostImageById);
 
 module.exports = router;

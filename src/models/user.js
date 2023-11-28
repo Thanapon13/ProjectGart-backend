@@ -66,6 +66,24 @@ module.exports = (Sequelize, DataTypes) => {
       },
       onDelete: "RESTRICT"
     });
+
+    User.hasMany(db.Follow, {
+      as: "Requester",
+      foreignKey: {
+        name: "requesterId",
+        allowNull: false
+      },
+      onDelete: "RESTRICT"
+    });
+
+    User.hasMany(db.Follow, {
+      as: "Accepter",
+      foreignKey: {
+        name: "accepterId",
+        allowNull: false
+      },
+      onDelete: "RESTRICT"
+    });
   };
 
   return User;

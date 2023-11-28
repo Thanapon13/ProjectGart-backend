@@ -1,5 +1,5 @@
-// const { sequelize } = require("./models");
-// // sequelize.sync({ force: true });
+const { sequelize } = require("./models");
+// sequelize.sync({ force: true });
 // sequelize.sync({ alter: true });
 
 require("dotenv").config();
@@ -17,6 +17,7 @@ const authRoute = require("./routes/auth-route");
 const userRoute = require("./routes/user-route");
 const postRoute = require("./routes/createPost-route");
 const tagRoute = require("./routes/tag-route");
+const followRoute = require("./routes/follow-route");
 
 const app = express();
 
@@ -34,9 +35,10 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRoute);
-app.use("/user", authenticateMiddleware, userRoute);
+app.use("/user", userRoute);
 app.use("/post", postRoute);
 app.use("/tag", authenticateMiddleware, tagRoute);
+app.use("/follow", authenticateMiddleware, followRoute);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 

@@ -1,11 +1,20 @@
 const fs = require("fs");
+const { Op } = require("sequelize");
 const cloudinary = require("../utils/cloudinary");
 const createError = require("../utils/create-error");
-const { User } = require("../models");
+const { User, Follow } = require("../models");
+const {
+  FOLLOW_ALREADYFOLLOW,
+  FOLLOW_NOTFOLLOWING,
+  STATUS_UNKNOWN,
+  STATUS_ME
+} = require("../config/constant");
 
 exports.updateProfileImage = async (req, res, next) => {
   try {
     let value;
+
+    console.log("file---------", req.files.profileImage);
 
     const profilePublicId = req.user.profileImage
       ? cloudinary.getPublicId(req.user.profileImage)
@@ -23,7 +32,6 @@ exports.updateProfileImage = async (req, res, next) => {
       );
       value = { profileImage };
     }
-
     await User.update(value, { where: { id: req.user.id } });
     res.status(200).json(value);
   } catch (err) {
@@ -43,6 +51,44 @@ exports.updateUserInfo = async (req, res, next) => {
 
     await User.update(value, { where: { id: req.user.id } });
     res.status(200).json(value);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getUserInfoById = async (req, res, next) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        id: req.params.userId
+      },
+      attributes: {
+        exclude: ["password"]
+      }
+    });
+
+    if (!user) {
+      createError("user with this id is not found", 400);
+    }
+
+    const userFollows = await Follow.findAll({
+      where: {
+        status: FOLLOW_ALREADYFOLLOW,
+        [Op.or]: [
+          { requesterId: req.params.userId },
+          { accepterId: req.params.userId }
+        ]
+      },
+      include: [
+        { model: User, as: "Requester", attributes: { exclude: ["password"] } },
+        { model: User, as: "Accepter", attributes: { exclude: ["password"] } }
+      ]
+    });
+
+    res.status(200).json({
+      user,
+      userFollows
+    });
   } catch (err) {
     next(err);
   }
