@@ -14,7 +14,7 @@ exports.updateProfileImage = async (req, res, next) => {
   try {
     let value;
 
-    console.log("file---------", req.files.profileImage);
+    console.log("req.files.profileImage:", req.files.profileImage);
 
     const profilePublicId = req.user.profileImage
       ? cloudinary.getPublicId(req.user.profileImage)
@@ -32,6 +32,7 @@ exports.updateProfileImage = async (req, res, next) => {
       );
       value = { profileImage };
     }
+
     await User.update(value, { where: { id: req.user.id } });
     res.status(200).json(value);
   } catch (err) {
@@ -47,7 +48,7 @@ exports.updateProfileImage = async (req, res, next) => {
 exports.updateUserInfo = async (req, res, next) => {
   try {
     const value = req.body;
-    console.log(req.body, "req.body");
+    console.log("req.body:", req.body);
 
     await User.update(value, { where: { id: req.user.id } });
     res.status(200).json(value);

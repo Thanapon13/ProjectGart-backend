@@ -2,6 +2,8 @@ const express = require("express");
 const upload = require("../middlewares/upload");
 const authenticateMiddleware = require("../middlewares/authenticate");
 const createPostController = require("../controllers/createPost-controller");
+const likeController = require("../controllers/like-controller");
+const commentController = require("../controllers/comment-controller");
 
 const router = express.Router();
 
@@ -18,7 +20,19 @@ router.post(
 );
 
 router.get("/getCreatePost", createPostController.getCreatePost);
+router.get("/getCreatePost/:userId", createPostController.getCreatePostById);
 
-router.get("/getPostImageById/:userId", createPostController.getPostImageById);
+router.post(
+  "/:postId/likes",
+  authenticateMiddleware,
+  likeController.createLike
+);
+router.delete("/:postId/likes", authenticateMiddleware, likeController.unlike);
+
+router.post(
+  "/:postId/comments",
+  authenticateMiddleware,
+  commentController.createComment
+);
 
 module.exports = router;

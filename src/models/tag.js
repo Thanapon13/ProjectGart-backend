@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notEmpty: true
         }
-      }
+      },
+      image: DataTypes.STRING
     },
     { underscored: true }
   );

@@ -1,6 +1,6 @@
 const fs = require("fs");
 const cloudinary = require("../utils/cloudinary");
-const { Post, User, Tag } = require("../models");
+const { Post, User, Tag, Like, Comment } = require("../models");
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -42,6 +42,24 @@ exports.getCreatePost = async (req, res, next) => {
         {
           model: User,
           attributes: ["firstName", "lastName", "id", "email", "profileImage"]
+        },
+        {
+          model: Like,
+          include: {
+            model: User,
+            attributes: {
+              exclude: ["password"]
+            }
+          }
+        },
+        {
+          model: Comment,
+          include: {
+            model: User,
+            attributes: {
+              exclude: ["password"]
+            }
+          }
         }
       ]
     });
@@ -58,15 +76,25 @@ exports.getCreatePost = async (req, res, next) => {
   }
 };
 
-exports.getPostImageById = async (req, res, next) => {
-  const userId = req.params.userId;
+exports.getCreatePostById = async (req, res, next) => {
   try {
-    let postImageById = await Post.findAll({
-      attributes: ["image", "id"],
-      where: { userId: userId }
+    const createPost = await User.findAll({
+      attributes: {
+        exclude: [
+          "password",
+          "email",
+          "mobile",
+          "isAdmin",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      include: [{ model: Post, attributes: ["image", "id"] }]
     });
 
-    res.status(201).json({ postImageById });
+    const pureCreatePost = JSON.parse(JSON.stringify(createPost));
+
+    res.status(201).json({ pureCreatePost });
   } catch (err) {
     next(err);
   }

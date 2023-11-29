@@ -37,7 +37,7 @@ app.use(express.json());
 app.use("/auth", authRoute);
 app.use("/user", userRoute);
 app.use("/post", postRoute);
-app.use("/tag", authenticateMiddleware, tagRoute);
+app.use("/tag", tagRoute);
 app.use("/follow", authenticateMiddleware, followRoute);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
