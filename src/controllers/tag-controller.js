@@ -14,7 +14,6 @@ exports.getTag = async (req, res, next) => {
 
 exports.createTag = async (req, res, next) => {
   try {
-    console.log("req.files?:",req.files?)
     const value = validateCreateTag({
       TagName: req.body.TagName,
       image: req.files?.image[0]?.path

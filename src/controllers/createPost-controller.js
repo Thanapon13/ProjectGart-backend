@@ -1,6 +1,6 @@
 const fs = require("fs");
 const cloudinary = require("../utils/cloudinary");
-const { Post, User, Tag, Like, Comment } = require("../models");
+const { Post, User, Tag, Like, Comment, Follow } = require("../models");
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -89,6 +89,7 @@ exports.getCreatePostById = async (req, res, next) => {
           "updatedAt"
         ]
       },
+
       include: [{ model: Post, attributes: ["image", "id"] }]
     });
 

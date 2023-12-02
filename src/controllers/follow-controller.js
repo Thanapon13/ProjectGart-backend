@@ -1,4 +1,4 @@
-const { Follow } = require("../models");
+const { Follow, User } = require("../models");
 const { Op } = require("sequelize");
 const { FOLLOW_ALREADYFOLLOW } = require("../config/constant");
 const createError = require("../utils/create-error");
@@ -31,9 +31,9 @@ exports.requestFollow = async (req, res, next) => {
     };
     console.log("value:", value);
 
-    await Follow.create(value);
+    const Follows = await Follow.create(value);
 
-    res.status(200).json({ message: "success follow request" });
+    res.status(200).json({ Follows });
   } catch (err) {
     next(err);
   }
@@ -55,6 +55,20 @@ exports.deleteFollow = async (req, res, next) => {
     }
 
     res.status(204).json();
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getCreateFollow = async (req, res, next) => {
+  try {
+    const createFollow = await Follow.findAll({});
+
+    const pureCreateFollow = JSON.parse(JSON.stringify(createFollow));
+
+    console.log("pureCreateFollow:", pureCreateFollow);
+
+    res.status(201).json({ pureCreateFollow });
   } catch (err) {
     next(err);
   }
