@@ -90,7 +90,19 @@ exports.getCreatePostById = async (req, res, next) => {
         ]
       },
 
-      include: [{ model: Post, attributes: ["image", "id"] }]
+      include: [
+        {
+          model: Post,
+          include: [
+            {
+              model: Like
+            },
+            {
+              model: Comment
+            }
+          ]
+        }
+      ]
     });
 
     const pureCreatePost = JSON.parse(JSON.stringify(createPost));

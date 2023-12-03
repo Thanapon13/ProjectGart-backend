@@ -35,4 +35,16 @@ router.post(
   commentController.createComment
 );
 
+router.post(
+  "/:postId/editComments",
+  authenticateMiddleware,
+  commentController.editComment
+);
+
+router.delete(
+  "/:commentId",
+  authenticateMiddleware,
+  commentController.deleteCommentId
+);
+
 module.exports = router;
