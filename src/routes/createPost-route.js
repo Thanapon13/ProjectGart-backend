@@ -49,7 +49,7 @@ router.post(
 );
 
 router.delete(
-  "/:commentId",
+  "/:commentId/comments",
   authenticateMiddleware,
   commentController.deleteCommentId
 );

@@ -2,9 +2,9 @@ const { Comment } = require("../models");
 
 exports.createComment = async (req, res, next) => {
   try {
-    console.log("req.body.title", req.body.title);
-    console.log("req.params.postId", req.params.postId);
-    console.log(" req.user.id", req.user.id);
+    // console.log("req.body.title", req.body.title);
+    // console.log("req.params.postId", req.params.postId);
+    // console.log(" req.user.id", req.user.id);
 
     const comment = await Comment.create({
       title: req.body.title,
@@ -21,9 +21,9 @@ exports.editComment = async (req, res, next) => {
   try {
     const value = req.body;
 
-    console.log("value:", value);
-    console.log("req.params.postId", req.params.postId);
-    console.log(" req.user.id", req.user.id);
+    // console.log("value:", value);
+    // console.log("req.params.postId", req.params.postId);
+    // console.log(" req.user.id", req.user.id);
 
     const editComments = {
       title: value.title,
@@ -43,10 +43,11 @@ exports.editComment = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.deleteCommentId = async (req, res, next) => {
   try {
     console.log("req.params.commentId:", req.params.commentId);
-    console.log("req.user.id:", req.user.id);
+    console.log("req.user.id:", req.user);
 
     const commentToDelete = await Comment.findOne({
       where: {
