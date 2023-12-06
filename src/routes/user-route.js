@@ -13,7 +13,15 @@ router.patch(
   userController.updateProfileImage
 );
 
+router.patch(
+  "/coverImage",
+  authenticateMiddleware,
+  upload.fields([{ name: "coverImage", maxCount: 1 }]),
+  userController.updatecoverImage
+);
+
 router.get("/:userId", userController.getUserInfoById);
 router.patch("/info", authenticateMiddleware, userController.updateUserInfo);
+router.patch("/infoPassword", authenticateMiddleware, userController.updateUserInfoPassword);
 
 module.exports = router;

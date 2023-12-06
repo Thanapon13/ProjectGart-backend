@@ -20,6 +20,13 @@ router.post(
 );
 
 router.get("/getCreatePost", createPostController.getCreatePost);
+
+router.delete(
+  "/:postId",
+  authenticateMiddleware,
+  createPostController.deletePost
+);
+
 router.get("/getCreatePost/:userId", createPostController.getCreatePostById);
 
 router.post(
@@ -46,5 +53,7 @@ router.delete(
   authenticateMiddleware,
   commentController.deleteCommentId
 );
+
+router.get("/search", createPostController.getBySearch);
 
 module.exports = router;

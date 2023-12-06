@@ -1,6 +1,7 @@
 const fs = require("fs");
 const cloudinary = require("../utils/cloudinary");
 const { Post, User, Tag, Like, Comment, Follow } = require("../models");
+const { Op } = require("sequelize");
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -38,7 +39,7 @@ exports.getCreatePost = async (req, res, next) => {
     const createPost = await Post.findAll({
       attributes: ["id", "title", "description", "image"],
       include: [
-        { model: Tag, attributes: ["TagName"] },
+        { model: Tag, attributes: ["TagName", "id"] },
         {
           model: User,
           attributes: ["firstName", "lastName", "id", "email", "profileImage"]
@@ -76,6 +77,48 @@ exports.getCreatePost = async (req, res, next) => {
   }
 };
 
+exports.deletePost = async (req, res, next) => {
+  try {
+    const { userId, tagId } = req.body;
+    console.log("userId:", userId);
+    console.log("tagId:", tagId);
+    console.log("req.params.postId:", req.params.postId);
+
+    const postDelete = await Post.findOne({
+      where: {
+        id: req.params.postId,
+        userId: userId,
+        tagId: tagId
+      },
+      include: [Comment, Like]
+    });
+
+    if (!postDelete) {
+      return res
+        .status(404)
+        .json({ message: "Comment not found for the user." });
+    }
+
+    await Comment.destroy({
+      where: {
+        postId: req.params.postId
+      }
+    });
+
+    await Like.destroy({
+      where: {
+        postId: req.params.postId
+      }
+    });
+
+    await postDelete.destroy();
+
+    res.status(200).json({ message: "Delete success" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getCreatePostById = async (req, res, next) => {
   try {
     const createPost = await User.findAll({
@@ -108,6 +151,43 @@ exports.getCreatePostById = async (req, res, next) => {
     const pureCreatePost = JSON.parse(JSON.stringify(createPost));
 
     res.status(201).json({ pureCreatePost });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getBySearch = async (req, res, next) => {
+  try {
+    const postName = req.query.postName || "";
+    console.log("postName:", postName);
+
+    let queryArray = [];
+    // for 2 field search
+    if (postName !== "") {
+      queryArray.push({
+        title: {
+          [Op.like]: `%${postName}%`
+        }
+      });
+    }
+    console.log("queryArray:", queryArray);
+
+    const postData = await Post.findAll({
+      where: {
+        title: {
+          [Op.like]: `%${postName}%`
+        }
+      }
+    });
+    console.log("postData:", postData);
+
+    if (postData.length > 0) {
+      // for show how many quantity of this product
+      quantity = await Post.count({ where: { [Op.and]: queryArray } });
+    }
+    const total = await Post.count({ where: { [Op.and]: queryArray } });
+
+    res.json({ postData: postData, quantity, total });
   } catch (err) {
     next(err);
   }

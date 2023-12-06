@@ -1,4 +1,4 @@
-const { Tag } = require("../models");
+const { Tag, Post, sequelize } = require("../models");
 const cloudinary = require("../utils/cloudinary");
 const fs = require("fs");
 const { validateCreateTag } = require("../valedators/createTga-validators");
@@ -37,18 +37,40 @@ exports.createTag = async (req, res, next) => {
 };
 
 exports.deleteTag = async (req, res, next) => {
-  try {
-    // console.log("req.params:", req.params);
+  const transaction = await sequelize.transaction();
 
-    const tag = await Tag.findOne({ where: { id: req.params.tagId } });
+  try {
+    console.log("req.params.tagId:", req.params.tagId);
+    // Find the tag
+    const tag = await Tag.findOne({
+      where: { id: req.params.tagId },
+      transaction
+    });
 
     if (!tag) {
-      createError("this post was not found", 400);
+      createError("This tag was not found", 400);
     }
 
-    await tag.destroy();
+    // Find all posts associated with the tag
+    const posts = await Post.findAll({
+      where: { tagId: req.params.tagId },
+      transaction
+    });
+
+    // Delete each post
+    for (const post of posts) {
+      await post.destroy({ transaction });
+    }
+
+    // Finally, delete the tag
+    await tag.destroy({ transaction });
+
+    // Commit the transaction
+    await transaction.commit();
+
     res.status(204).json({ message: "Delete Complete!!" });
   } catch (err) {
+    await transaction.rollback();
     next(err);
   }
 };

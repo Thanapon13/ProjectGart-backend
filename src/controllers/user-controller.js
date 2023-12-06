@@ -2,13 +2,9 @@ const fs = require("fs");
 const { Op } = require("sequelize");
 const cloudinary = require("../utils/cloudinary");
 const createError = require("../utils/create-error");
-const { User, Follow } = require("../models");
-const {
-  FOLLOW_ALREADYFOLLOW,
-  FOLLOW_NOTFOLLOWING,
-  STATUS_UNKNOWN,
-  STATUS_ME
-} = require("../config/constant");
+const { User, Follow, Post } = require("../models");
+const bcrypt = require("bcrypt");
+const { FOLLOW_ALREADYFOLLOW } = require("../config/constant");
 
 exports.updateProfileImage = async (req, res, next) => {
   try {
@@ -44,6 +40,45 @@ exports.updateProfileImage = async (req, res, next) => {
   }
 };
 
+exports.updatecoverImage = async (req, res, next) => {
+  try {
+    let value;
+
+    // console.log("req.files.coverImage:", req.files.coverImage);
+    // console.log(" req.user:", req.user);
+
+    const { coverImage } = req.user;
+    // console.log("coverImage:", coverImage);
+
+    const coverPublicId = coverImage
+      ? cloudinary.getPublicId(coverImage)
+      : null;
+
+    if (!req.files.coverImage) {
+      createError("coverImage is required");
+    }
+
+    if (req.files.coverImage) {
+      // console.log("req.files.coverImage:", req.files.coverImage);
+      const coverImage = await cloudinary.uploadProfile(
+        req.files.coverImage[0].path,
+        coverPublicId
+      );
+      value = { coverImage };
+      console.log("value:", value);
+    }
+
+    await User.update(value, { where: { id: req.user.id } });
+    res.status(200).json(value);
+  } catch (err) {
+    next(err);
+  } finally {
+    if (req.files.coverImage) {
+      fs.unlinkSync(req.files.coverImage[0].path);
+    }
+  }
+};
+
 // update user profile
 exports.updateUserInfo = async (req, res, next) => {
   try {
@@ -52,6 +87,49 @@ exports.updateUserInfo = async (req, res, next) => {
 
     await User.update(value, { where: { id: req.user.id } });
     res.status(200).json(value);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateUserInfoPassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    console.log("oldPassword:", oldPassword);
+    console.log("newPassword:", newPassword);
+    console.log("confirmPassword:", confirmPassword);
+
+    const userId = req.user.id;
+    const user = await User.findByPk(userId);
+    console.log("user:", user);
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    // Compare the old password with the hashed password stored in the database
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isPasswordMatch) {
+      return res.status(401).json({ message: "Invalid old password" });
+    }
+
+    // Check if the new password and confirm password match
+    if (newPassword !== confirmPassword) {
+      return res
+        .status(400)
+        .json({ message: "New password and confirm password do not match" });
+    }
+
+    // Hash the new password before updating the user's password in the database
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+    // Update the user's password with the new hashed password
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
     next(err);
   }
@@ -86,9 +164,12 @@ exports.getUserInfoById = async (req, res, next) => {
       ]
     });
 
+    const Posts = await Post.findAll({});
+
     res.status(200).json({
       user,
-      userFollows
+      userFollows,
+      Posts
     });
   } catch (err) {
     next(err);
