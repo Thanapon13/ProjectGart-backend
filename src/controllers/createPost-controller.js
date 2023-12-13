@@ -2,6 +2,7 @@ const fs = require("fs");
 const cloudinary = require("../utils/cloudinary");
 const { Post, User, Tag, Like, Comment, Follow } = require("../models");
 const { Op } = require("sequelize");
+const { FOLLOW_ALREADYFOLLOW } = require("../config/constant");
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -37,13 +38,14 @@ exports.createPost = async (req, res, next) => {
 exports.getCreatePost = async (req, res, next) => {
   try {
     const createPost = await Post.findAll({
-      attributes: ["id", "title", "description", "image"],
+      attributes: ["id", "title", "description", "image", "createdAt"],
       include: [
         { model: Tag, attributes: ["TagName", "id"] },
         {
           model: User,
           attributes: ["firstName", "lastName", "id", "email", "profileImage"]
         },
+
         {
           model: Like,
           include: {

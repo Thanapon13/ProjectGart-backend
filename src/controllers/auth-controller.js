@@ -46,6 +46,9 @@ exports.login = async (req, res, next) => {
     if (!isCorrect) {
       createError("invalid email or password", 400);
     }
+
+    await User.update({ lastLoggedIn: new Date() }, { where: { id: user.id } });
+
     const accessToken = jwt.sign(
       {
         id: user.id,
@@ -72,5 +75,6 @@ exports.login = async (req, res, next) => {
 };
 
 exports.getMe = (req, res, next) => {
+  console.log("user:", req.user);
   res.status(200).json({ user: req.user });
 };

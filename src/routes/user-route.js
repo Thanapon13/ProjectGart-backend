@@ -20,8 +20,15 @@ router.patch(
   userController.updatecoverImage
 );
 
+router.get("/users", authenticateMiddleware, userController.getUserData);
 router.get("/:userId", userController.getUserInfoById);
 router.patch("/info", authenticateMiddleware, userController.updateUserInfo);
-router.patch("/infoPassword", authenticateMiddleware, userController.updateUserInfoPassword);
+router.patch(
+  "/infoPassword",
+  authenticateMiddleware,
+  userController.updateUserInfoPassword
+);
+
+router.delete("/:userId", authenticateMiddleware, userController.deleteUser);
 
 module.exports = router;

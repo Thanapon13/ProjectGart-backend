@@ -9,21 +9,6 @@ exports.requestFollow = async (req, res, next) => {
       createError("cannot request yourself", 400);
     }
 
-    // const existFollow = await Follow.findOne({
-    //   where: {
-    //     [Op.or]: [
-    //       { requesterId: req.params.userId, accepterId: req.user.id },
-    //       { requesterId: req.user.id, accepterId: req.params.userId }
-    //     ]
-    //   }
-    // });
-
-    // console.log("existFollow:", existFollow);
-
-    // if (existFollow) {
-    //   createError("already follow or pending", 400);
-    // }
-
     const value = {
       requesterId: req.user.id,
       accepterId: req.params.userId,

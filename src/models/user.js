@@ -37,6 +37,11 @@ module.exports = (Sequelize, DataTypes) => {
       isAdmin: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+      },
+
+      lastLoggedIn: {
+        type: DataTypes.DATE,
+        allowNull: true
       }
     },
     { underscored: true }

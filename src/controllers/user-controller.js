@@ -2,7 +2,7 @@ const fs = require("fs");
 const { Op } = require("sequelize");
 const cloudinary = require("../utils/cloudinary");
 const createError = require("../utils/create-error");
-const { User, Follow, Post } = require("../models");
+const { User, Post, Comment, Like, Follow, sequelize } = require("../models");
 const bcrypt = require("bcrypt");
 const { FOLLOW_ALREADYFOLLOW } = require("../config/constant");
 
@@ -172,6 +172,153 @@ exports.getUserInfoById = async (req, res, next) => {
       Posts
     });
   } catch (err) {
+    next(err);
+  }
+};
+
+exports.getUserData = async (req, res, next) => {
+  try {
+    const users = await User.findAll({
+      attributes: [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "lastLoggedIn",
+        "profileImage"
+      ],
+      include: [
+        {
+          model: Follow,
+          as: "Requester",
+          attributes: ["requesterId", "accepterId"],
+          include: [
+            {
+              model: User,
+              as: "Requester",
+              attributes: [
+                "id",
+                "firstName",
+                "lastName",
+                "email",
+                "mobile",
+                "profileImage",
+                "coverImage",
+                "isAdmin",
+                "lastLoggedIn",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          ]
+        },
+        {
+          model: Follow,
+          as: "Accepter",
+          attributes: ["accepterId", "requesterId"],
+          include: [
+            {
+              model: User,
+              as: "Accepter",
+              attributes: [
+                "id",
+                "firstName",
+                "lastName",
+                "email",
+                "mobile",
+                "profileImage",
+                "coverImage",
+                "isAdmin",
+                "lastLoggedIn",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    const pureUsersData = JSON.parse(JSON.stringify(users));
+
+    res.status(200).json({ pureUsersData });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteUser = async (req, res, next) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const userId = req.params.userId;
+    console.log("userId----", userId);
+
+    // Delete associated records in the likes table
+    await Like.destroy({
+      where: {
+        userId
+      },
+      transaction
+    });
+
+    // Find all posts associated with the user
+    const userPosts = await Post.findAll({
+      where: {
+        userId
+      },
+      attributes: ["id"]
+    });
+
+    const postIds = userPosts.map(post => post.id);
+
+    // Delete associated records in the likes table for each post
+    await Like.destroy({
+      where: {
+        postId: {
+          [Op.in]: postIds
+        }
+      },
+      transaction
+    });
+
+    // Delete associated records in the comments table for each post
+    await Comment.destroy({
+      where: {
+        postId: {
+          [Op.in]: postIds
+        }
+      },
+      transaction
+    });
+
+    // Delete associated records in other tables
+    await Post.destroy({
+      where: {
+        userId
+      },
+      transaction
+    });
+
+    await Follow.destroy({
+      where: {
+        [Op.or]: [{ requesterId: userId }, { accepterId: userId }]
+      },
+      transaction
+    });
+
+    // Delete the user
+    await User.destroy({
+      where: {
+        id: userId
+      },
+      transaction
+    });
+
+    await transaction.commit();
+    res.status(200).json({ message: "Delete success" });
+  } catch (err) {
+    await transaction.rollback();
     next(err);
   }
 };
