@@ -43,7 +43,14 @@ exports.getCreatePost = async (req, res, next) => {
         { model: Tag, attributes: ["TagName", "id"] },
         {
           model: User,
-          attributes: ["firstName", "lastName", "id", "email", "profileImage"]
+          attributes: [
+            "firstName",
+            "lastName",
+            "id",
+            "email",
+            "profileImage",
+            "coverImage"
+          ]
         },
 
         {
