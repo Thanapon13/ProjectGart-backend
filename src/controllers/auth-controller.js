@@ -16,7 +16,7 @@ exports.register = async (req, res, next) => {
     });
 
     if (user) {
-      createError("invalid email or password", 400);
+      createError("invalid Email", 400);
     }
 
     value.password = await bcrypt.hash(value.password, 12);

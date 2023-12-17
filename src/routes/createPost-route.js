@@ -21,6 +21,18 @@ router.post(
 
 router.get("/getCreatePost", createPostController.getCreatePost);
 
+router.post(
+  "/editPost/:postId",
+  authenticateMiddleware,
+  upload.fields([
+    {
+      name: "image",
+      maxCount: 1
+    }
+  ]),
+  createPostController.editPost
+);
+
 router.delete(
   "/:postId",
   authenticateMiddleware,

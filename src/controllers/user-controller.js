@@ -4,7 +4,10 @@ const cloudinary = require("../utils/cloudinary");
 const createError = require("../utils/create-error");
 const { User, Post, Comment, Like, Follow, sequelize } = require("../models");
 const bcrypt = require("bcrypt");
-const { FOLLOW_ALREADYFOLLOW } = require("../config/constant");
+const {
+  FOLLOW_ALREADYFOLLOW,
+  FOLLOW_NOTFOLLOWING
+} = require("../config/constant");
 
 exports.updateProfileImage = async (req, res, next) => {
   try {
@@ -191,7 +194,7 @@ exports.getUserData = async (req, res, next) => {
         {
           model: Follow,
           as: "Requester",
-          attributes: ["requesterId", "accepterId"],
+          attributes: ["requesterId", "accepterId", "status"],
           include: [
             {
               model: User,
@@ -215,7 +218,7 @@ exports.getUserData = async (req, res, next) => {
         {
           model: Follow,
           as: "Accepter",
-          attributes: ["accepterId", "requesterId"],
+          attributes: ["accepterId", "requesterId", "status"],
           include: [
             {
               model: User,
@@ -233,6 +236,16 @@ exports.getUserData = async (req, res, next) => {
                 "createdAt",
                 "updatedAt"
               ]
+            }
+          ]
+        },
+        {
+          model: Post,
+          attributes: ["id"],
+          include: [
+            {
+              model: User,
+              attributes: ["id", "firstName", "lastName"]
             }
           ]
         }

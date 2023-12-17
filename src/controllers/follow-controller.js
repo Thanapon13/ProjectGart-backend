@@ -1,12 +1,26 @@
-const { Follow, User } = require("../models");
+const { Follow } = require("../models");
 const { Op } = require("sequelize");
-const { FOLLOW_ALREADYFOLLOW } = require("../config/constant");
+const { FOLLOW_ALREADYFOLLOW, FOLLOW_DELETED } = require("../config/constant");
 const createError = require("../utils/create-error");
 
 exports.requestFollow = async (req, res, next) => {
   try {
     if (req.user.id === +req.params.userId) {
-      createError("cannot request yourself", 400);
+      createError("Cannot request to follow yourself", 400);
+    }
+
+    const existingFollow = await Follow.findOne({
+      where: {
+        requesterId: req.user.id,
+        accepterId: req.params.userId,
+        status: {
+          [Op.not]: FOLLOW_DELETED
+        }
+      }
+    });
+
+    if (existingFollow && existingFollow.status === FOLLOW_ALREADYFOLLOW) {
+      createError("Already following", 400);
     }
 
     const value = {
@@ -14,11 +28,10 @@ exports.requestFollow = async (req, res, next) => {
       accepterId: req.params.userId,
       status: FOLLOW_ALREADYFOLLOW
     };
-    console.log("value:", value);
 
-    const Follows = await Follow.create(value);
+    const newFollow = await Follow.create(value);
 
-    res.status(200).json({ Follows });
+    res.status(200).json({ newFollow });
   } catch (err) {
     next(err);
   }
@@ -26,21 +39,37 @@ exports.requestFollow = async (req, res, next) => {
 
 exports.deleteFollow = async (req, res, next) => {
   try {
-    const totalDelete = await Follow.destroy({
+    console.log("UserLogin:", req.user.id);
+    console.log("unfollowFollowId:", req.params.followId);
+
+    const follow = await Follow.findOne({
       where: {
+        accepterId: req.params.followId,
         [Op.or]: [
+          // { requesterId: req.user.id },
+          // { accepterId: req.params.followId } ,
           { requesterId: req.params.followId, accepterId: req.user.id },
           { requesterId: req.user.id, accepterId: req.params.followId }
-        ]
+        ],
+        status: FOLLOW_ALREADYFOLLOW
       }
     });
 
-    if (totalDelete === 0) {
-      createError("you do not have relationship with this follow", 400);
+    console.log("follow:", follow);
+
+    if (!follow) {
+      throw createError("You do not have a relationship with this follow", 400);
+    }
+
+    // Update only if the status is FOLLOW_ALREADYFOLLOW
+    if (follow.status === FOLLOW_ALREADYFOLLOW) {
+      const update = await follow.update({ status: FOLLOW_DELETED });
+      console.log("update:", update);
     }
 
     res.status(204).json();
   } catch (err) {
+    console.error("Error in deleteFollow:", err);
     next(err);
   }
 };

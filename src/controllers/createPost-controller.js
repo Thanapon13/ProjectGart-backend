@@ -128,29 +128,43 @@ exports.deletePost = async (req, res, next) => {
   }
 };
 
+// exports.getCreatePostById = async (req, res, next) => {
+//   try {
+//     const createPost = await Post.findAll({
+//       where: {
+//         id: req.params.postId
+//       },
+
+//       include: [
+//         {
+//           model: Tag
+//         }
+//       ]
+//     });
+
+//     const pureCreatePost = JSON.parse(JSON.stringify(createPost));
+
+//     res.status(201).json({ pureCreatePost });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 exports.getCreatePostById = async (req, res, next) => {
   try {
     const createPost = await User.findAll({
-      attributes: {
-        exclude: [
-          "password",
-          "email",
-          "mobile",
-          "isAdmin",
-          "createdAt",
-          "updatedAt"
-        ]
+      where: {
+        id: req.params.userId
       },
+      attributes: ["firstName", "lastName", "id"],
 
       include: [
         {
           model: Post,
           include: [
             {
-              model: Like
-            },
-            {
-              model: Comment
+              model: Tag,
+              attributes: ["TagName", "id"]
             }
           ]
         }
@@ -199,5 +213,49 @@ exports.getBySearch = async (req, res, next) => {
     res.json({ postData: postData, quantity, total });
   } catch (err) {
     next(err);
+  }
+};
+
+exports.editPost = async (req, res, next) => {
+  try {
+    const { title, tagId, description } = req.body;
+    const postId = req.params.postId;
+    console.log("postId:", postId);
+
+    console.log("title:", title);
+    console.log("tagId:", tagId);
+    console.log("description:", description);
+    console.log("req.files:", req.files);
+
+    if (!req.files || !req.files.image || req.files.image.length === 0) {
+      return res.status(400).json({ message: "Post image is required" });
+    }
+    const postImages = [];
+    for (let i = 0; i < req.files.image.length; i++) {
+      const image = await cloudinary.uploaPostImage(req.files.image[i].path);
+      console.log("image:", image);
+      postImages.push(image);
+      console.log("Uploaded image:", image);
+      fs.unlinkSync(req.files.image[i].path);
+    }
+
+    const editPost = {
+      title: title,
+      description: description,
+      tagId: tagId,
+      image: JSON.stringify(postImages)
+    };
+    // console.log("editComments:", editComments);
+
+    const pureEditPost = JSON.parse(JSON.stringify(editPost));
+
+    await Post.update(pureEditPost, {
+      where: { id: postId }
+    });
+
+    res.status(201).json({ message: "Edit Completed!!" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

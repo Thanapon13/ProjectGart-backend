@@ -1,6 +1,7 @@
 const {
   FOLLOW_ALREADYFOLLOW,
-  FOLLOW_NOTFOLLOWING
+  FOLLOW_NOTFOLLOWING,
+  FOLLOW_DELETED
 } = require("../config/constant");
 
 module.exports = (sequelize, DataTypes) => {
@@ -8,7 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     "Follow",
     {
       status: {
-        type: DataTypes.ENUM(FOLLOW_NOTFOLLOWING, FOLLOW_ALREADYFOLLOW),
+        type: DataTypes.ENUM(
+          FOLLOW_NOTFOLLOWING,
+          FOLLOW_ALREADYFOLLOW,
+          FOLLOW_DELETED
+        ),
         allowNull: false,
         defaultValue: FOLLOW_NOTFOLLOWING
       }
