@@ -29,6 +29,4 @@ router.patch(
   userController.updateUserInfoPassword
 );
 
-router.delete("/:userId", authenticateMiddleware, userController.deleteUser);
-
 module.exports = router;

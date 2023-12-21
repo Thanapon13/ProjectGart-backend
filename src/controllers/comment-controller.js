@@ -21,9 +21,9 @@ exports.editComment = async (req, res, next) => {
   try {
     const value = req.body;
 
-    // console.log("value:", value);
-    // console.log("req.params.postId", req.params.postId);
-    // console.log(" req.user.id", req.user.id);
+    console.log("value:", value.title);
+    console.log("req.params.postId", req.params.postId);
+    console.log(" req.user.id", req.user.id);
 
     const editComments = {
       title: value.title,

@@ -1,7 +1,7 @@
 const express = require("express");
 const upload = require("../middlewares/upload");
 const authenticateMiddleware = require("../middlewares/authenticate");
-const createPostController = require("../controllers/createPost-controller");
+const postController = require("../controllers/post-controller");
 const likeController = require("../controllers/like-controller");
 const commentController = require("../controllers/comment-controller");
 
@@ -16,10 +16,10 @@ router.post(
       maxCount: 1
     }
   ]),
-  createPostController.createPost
+  postController.createPost
 );
 
-router.get("/getCreatePost", createPostController.getCreatePost);
+router.get("/getCreatePost", postController.getCreatePost);
 
 router.post(
   "/editPost/:postId",
@@ -30,16 +30,10 @@ router.post(
       maxCount: 1
     }
   ]),
-  createPostController.editPost
+  postController.editPost
 );
 
-router.delete(
-  "/:postId",
-  authenticateMiddleware,
-  createPostController.deletePost
-);
-
-router.get("/getCreatePost/:userId", createPostController.getCreatePostById);
+router.get("/getCreatePost/:userId", postController.getCreatePostById);
 
 router.post(
   "/:postId/likes",
@@ -66,6 +60,6 @@ router.delete(
   commentController.deleteCommentId
 );
 
-router.get("/search", createPostController.getBySearch);
+router.get("/search", postController.getBySearch);
 
 module.exports = router;

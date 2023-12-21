@@ -22,6 +22,14 @@ module.exports = (sequelize, DataTypes) => {
       },
       onDelete: "RESTRICT"
     });
+
+    Tag.hasMany(db.AdminHistoryRestore, {
+      foreignKey: {
+        name: "tagId",
+        allowNull: false
+      },
+      onDelete: "RESTRICT"
+    });
   };
 
   return Tag;

@@ -89,6 +89,14 @@ module.exports = (Sequelize, DataTypes) => {
       },
       onDelete: "RESTRICT"
     });
+
+    User.hasMany(db.AdminHistoryRestore, {
+      foreignKey: {
+        name: "userId",
+        allowNull: false
+      },
+      onDelete: "RESTRICT"
+    });
   };
 
   return User;

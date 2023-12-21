@@ -1,6 +1,14 @@
 const fs = require("fs");
 const cloudinary = require("../utils/cloudinary");
-const { Post, User, Tag, Like, Comment, Follow } = require("../models");
+const {
+  Post,
+  User,
+  Tag,
+  Like,
+  Comment,
+  Follow,
+  AdminHistoryRestore
+} = require("../models");
 const { Op } = require("sequelize");
 const { FOLLOW_ALREADYFOLLOW } = require("../config/constant");
 
@@ -108,6 +116,20 @@ exports.deletePost = async (req, res, next) => {
         .json({ message: "Comment not found for the user." });
     }
 
+    const pureCreatePostToHistory = JSON.parse(JSON.stringify(postDelete));
+    console.log("pureCreatePostToHistory:", pureCreatePostToHistory);
+
+    const createPostToHistory = {
+      titlePost: pureCreatePostToHistory.title,
+      imagePost: pureCreatePostToHistory.image,
+      description: pureCreatePostToHistory.description,
+      tagId: pureCreatePostToHistory.tagId,
+      userId: pureCreatePostToHistory.userId
+    };
+
+    const adminHistory = await AdminHistoryRestore.create(createPostToHistory);
+    console.log("adminHistory:", adminHistory);
+
     await Comment.destroy({
       where: {
         postId: req.params.postId
@@ -127,28 +149,6 @@ exports.deletePost = async (req, res, next) => {
     next(err);
   }
 };
-
-// exports.getCreatePostById = async (req, res, next) => {
-//   try {
-//     const createPost = await Post.findAll({
-//       where: {
-//         id: req.params.postId
-//       },
-
-//       include: [
-//         {
-//           model: Tag
-//         }
-//       ]
-//     });
-
-//     const pureCreatePost = JSON.parse(JSON.stringify(createPost));
-
-//     res.status(201).json({ pureCreatePost });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 
 exports.getCreatePostById = async (req, res, next) => {
   try {

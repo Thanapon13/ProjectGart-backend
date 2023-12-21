@@ -19,6 +19,4 @@ router.post(
   tagController.createTag
 );
 
-router.delete("/:tagId", authenticateMiddleware, tagController.deleteTag);
-
 module.exports = router;
