@@ -9,6 +9,7 @@ const {
   AdminHistoryRestore
 } = require("../models");
 const { Op } = require("sequelize");
+const { HIDE_POST } = require("../config/constant");
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -44,7 +45,14 @@ exports.createPost = async (req, res, next) => {
 exports.getCreatePost = async (req, res, next) => {
   try {
     const createPost = await Post.findAll({
-      attributes: ["id", "title", "description", "image", "createdAt"],
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "image",
+        "status",
+        "createdAt"
+      ],
       include: [
         { model: Tag, attributes: ["TagName", "id"] },
         {
@@ -255,5 +263,27 @@ exports.editPost = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.updateStatusPost = async (req, res, next) => {
+  try {
+    console.log("req.params.postId", req.params.postId);
+
+    const updateStatus = {
+      status: HIDE_POST
+    };
+    console.log("updateStatus:", updateStatus);
+
+    const pureUpdateStatus = JSON.parse(JSON.stringify(updateStatus));
+    console.log("pureUpdateStatus:", pureUpdateStatus);
+
+    await Post.update(pureUpdateStatus, {
+      where: { id: req.params.postId }
+    });
+
+    res.status(201).json({ message: "Update Status Completed!!" });
+  } catch (err) {
+    next(err);
   }
 };
