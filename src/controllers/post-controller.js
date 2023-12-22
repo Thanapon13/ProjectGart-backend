@@ -6,11 +6,9 @@ const {
   Tag,
   Like,
   Comment,
-  Follow,
   AdminHistoryRestore
 } = require("../models");
 const { Op } = require("sequelize");
-const { FOLLOW_ALREADYFOLLOW } = require("../config/constant");
 
 exports.createPost = async (req, res, next) => {
   try {

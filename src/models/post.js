@@ -1,3 +1,5 @@
+const { HIDE_POST, UNHIDE_POST } = require("../config/constant");
+
 module.exports = (sequelize, DataTypes) => {
   const Post = sequelize.define(
     "Post",
@@ -17,6 +19,11 @@ module.exports = (sequelize, DataTypes) => {
       description: {
         type: DataTypes.TEXT,
         allowNull: false
+      },
+      status: {
+        type: DataTypes.ENUM(HIDE_POST, UNHIDE_POST),
+        allowNull: false,
+        defaultValue: UNHIDE_POST
       }
     },
     { underscored: true }

@@ -19,4 +19,9 @@ router.post(
   adminController.restoredPost
 );
 
+router.delete(
+  "/deleteRestoredPost/:adminHistoryRestoreId",
+  adminController.deleteRestoredPost
+);
+
 module.exports = router;

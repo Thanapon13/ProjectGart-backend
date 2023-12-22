@@ -45,9 +45,7 @@ exports.restoredPost = async (req, res, next) => {
     });
 
     if (!restoredPostData) {
-      return res
-        .status(404)
-        .json({ message: "RestoredPostData not found for the user." });
+      return res.status(404).json({ message: "RestoredPostData not found" });
     }
 
     console.log("restoredPostData:", restoredPostData);
@@ -68,6 +66,31 @@ exports.restoredPost = async (req, res, next) => {
     await restoredPostData.destroy();
 
     res.status(200).json({ message: " Restored Post success" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteRestoredPost = async (req, res, next) => {
+  try {
+    console.log(
+      "req.params.adminHistoryRestoreId:",
+      req.params.adminHistoryRestoreId
+    );
+
+    const restoredPostData = await AdminHistoryRestore.findOne({
+      where: {
+        id: req.params.adminHistoryRestoreId
+      }
+    });
+
+    if (!restoredPostData) {
+      return res.status(404).json({ message: "RestoredPostData not found" });
+    }
+
+    await restoredPostData.destroy();
+
+    res.status(200).json({ message: "Delete RestoredPost success" });
   } catch (err) {
     next(err);
   }
