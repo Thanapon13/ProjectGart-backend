@@ -6,7 +6,8 @@ const { User, Post, Comment, Like, Follow, sequelize } = require("../models");
 const bcrypt = require("bcrypt");
 const {
   FOLLOW_ALREADYFOLLOW,
-  FOLLOW_NOTFOLLOWING
+  BAN_USER,
+  SHOW_USER
 } = require("../config/constant");
 
 exports.updateProfileImage = async (req, res, next) => {
@@ -335,3 +336,113 @@ exports.deleteUser = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.updateStatusBanUser = async (req, res, next) => {
+  try {
+    console.log("req.params.userId", req.params.userId);
+
+    const updateStatus = {
+      status: BAN_USER
+    };
+
+    const existingUpdateStatus = await User.findOne({
+      where: {
+        id: req.params.userId,
+        status: {
+          [Op.not]: SHOW_USER
+        }
+      }
+    });
+    // console.log("existingUpdateStatus:", existingUpdateStatus);
+
+    if (existingUpdateStatus && existingUpdateStatus.status === BAN_USER) {
+      createError("Already Ban User", 400);
+    }
+
+    const pureUpdateStatus = JSON.parse(JSON.stringify(updateStatus));
+    // console.log("pureUpdateStatus:", pureUpdateStatus);
+
+    await User.update(pureUpdateStatus, {
+      where: { id: req.params.userId }
+    });
+
+    res.status(201).json({ message: "Update Status Completed!!" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateStatusShowUser = async (req, res, next) => {
+  try {
+    const { userId, countdown } = req.params;
+    console.log("userId:", userId);
+    console.log("countdown:", countdown);
+
+    const updateStatus = {
+      status: SHOW_USER
+    };
+
+    const existingUpdateStatus = await User.findOne({
+      where: {
+        id: userId,
+        status: {
+          [Op.not]: BAN_USER
+        }
+      }
+    });
+
+    if (existingUpdateStatus && existingUpdateStatus.status === SHOW_USER) {
+      createError("Already Show User", 400);
+    }
+
+    const pureUpdateStatus = JSON.parse(JSON.stringify(updateStatus));
+
+    if (parseInt(countdown) === 0) {
+      await User.update(pureUpdateStatus, { where: { id: userId } });
+      res.status(201).json({ message: "Update Status Completed!!" });
+    } else {
+      res
+        .status(200)
+        .json({ message: "Countdown is not zero, update skipped." });
+    }
+
+    res.status(201).json({ message: "Update Status Completed!!" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// exports.updateStatusShowUser = async (req, res, next) => {
+//   try {
+//     console.log("req.params.userId", req.params.userId);
+
+//     const updateStatus = {
+//       status: SHOW_USER
+//     };
+
+//     const existingUpdateStatus = await User.findOne({
+//       where: {
+//         id: req.params.userId,
+//         status: {
+//           [Op.not]: BAN_USER
+//         }
+//       }
+//     });
+//     // console.log("existingUpdateStatus:", existingUpdateStatus);
+
+//     if (existingUpdateStatus && existingUpdateStatus.status === SHOW_USER) {
+//       createError("Already Ban User", 400);
+//     }
+
+//     const pureUpdateStatus = JSON.parse(JSON.stringify(updateStatus));
+//     // console.log("pureUpdateStatus:", pureUpdateStatus);
+
+//     await User.update(pureUpdateStatus, {
+//       where: { id: req.params.userId }
+//     });
+
+//     res.status(201).json({ message: "Update Status Completed!!" });
+//   } catch (err) {
+//     next(err);
+//   }
+// };

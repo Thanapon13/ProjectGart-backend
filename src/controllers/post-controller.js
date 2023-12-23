@@ -9,7 +9,8 @@ const {
   AdminHistoryRestore
 } = require("../models");
 const { Op } = require("sequelize");
-const { HIDE_POST } = require("../config/constant");
+const { HIDE_POST, SHOW_POST } = require("../config/constant");
+const createError = require("../utils/create-error");
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -266,17 +267,65 @@ exports.editPost = async (req, res, next) => {
   }
 };
 
-exports.updateStatusPost = async (req, res, next) => {
+exports.updateStatusPostHidePost = async (req, res, next) => {
   try {
     console.log("req.params.postId", req.params.postId);
 
     const updateStatus = {
       status: HIDE_POST
     };
-    console.log("updateStatus:", updateStatus);
+
+    const existingUpdateStatus = await Post.findOne({
+      where: {
+        id: req.params.postId,
+        status: {
+          [Op.not]: SHOW_POST
+        }
+      }
+    });
+    // console.log("existingUpdateStatus:", existingUpdateStatus);
+
+    if (existingUpdateStatus && existingUpdateStatus.status === HIDE_POST) {
+      createError("Already Hide Post", 400);
+    }
 
     const pureUpdateStatus = JSON.parse(JSON.stringify(updateStatus));
-    console.log("pureUpdateStatus:", pureUpdateStatus);
+    // console.log("pureUpdateStatus:", pureUpdateStatus);
+
+    await Post.update(pureUpdateStatus, {
+      where: { id: req.params.postId }
+    });
+
+    res.status(201).json({ message: "Update Status Completed!!" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateStatusPostShowPost = async (req, res, next) => {
+  try {
+    console.log("req.params.postId", req.params.postId);
+
+    const updateStatus = {
+      status: SHOW_POST
+    };
+
+    const existingUpdateStatus = await Post.findOne({
+      where: {
+        id: req.params.postId,
+        status: {
+          [Op.not]: HIDE_POST
+        }
+      }
+    });
+    // console.log("existingUpdateStatus:", existingUpdateStatus);
+
+    if (existingUpdateStatus && existingUpdateStatus.status === SHOW_POST) {
+      createError("Already Show Post", 400);
+    }
+
+    const pureUpdateStatus = JSON.parse(JSON.stringify(updateStatus));
+    // console.log("pureUpdateStatus:", pureUpdateStatus);
 
     await Post.update(pureUpdateStatus, {
       where: { id: req.params.postId }

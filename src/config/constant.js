@@ -4,3 +4,6 @@ exports.FOLLOW_DELETED = "UNFOLLOW";
 
 exports.HIDE_POST = "HIDEPOST";
 exports.SHOW_POST = "SHOWPOST";
+
+exports.SHOW_USER = "SHOWUSER";
+exports.BAN_USER = "BANUSER";

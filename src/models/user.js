@@ -1,3 +1,5 @@
+const { SHOW_USER, BAN_USER } = require("../config/constant");
+
 module.exports = (Sequelize, DataTypes) => {
   const User = Sequelize.define(
     "User",
@@ -42,6 +44,11 @@ module.exports = (Sequelize, DataTypes) => {
       lastLoggedIn: {
         type: DataTypes.DATE,
         allowNull: true
+      },
+      status: {
+        type: DataTypes.ENUM(SHOW_USER, BAN_USER),
+        allowNull: false,
+        defaultValue: SHOW_USER
       }
     },
     { underscored: true }

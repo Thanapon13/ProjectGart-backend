@@ -10,9 +10,26 @@ router.delete("/tag/:tagId", tagController.deleteTag);
 
 router.delete("/post/:postId", postController.deletePost);
 
-router.post("/post/updateStatus/:postId", postController.updateStatusPost);
+router.post(
+  "/post/updateStatusPostHidePost/:postId",
+  postController.updateStatusPostHidePost
+);
+router.post(
+  "/post/updateStatusPostShowPost/:postId",
+  postController.updateStatusPostShowPost
+);
 
 router.delete("/user/:userId", userController.deleteUser);
+
+router.post(
+  "/user/updateStatusBanUser/:userId",
+  userController.updateStatusBanUser
+);
+
+router.post(
+  "/user/updateStatusShowUser/:userId/:countdown",
+  userController.updateStatusShowUser
+);
 
 router.get("/historyPost", adminController.getHistoryPost);
 
