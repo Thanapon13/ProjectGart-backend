@@ -49,7 +49,9 @@ module.exports = (Sequelize, DataTypes) => {
         type: DataTypes.ENUM(SHOW_USER, BAN_USER),
         allowNull: false,
         defaultValue: SHOW_USER
-      }
+      },
+      startBanDate: { type: DataTypes.DATE, allowNull: true },
+      endBanDate: { type: DataTypes.DATE, allowNull: true }
     },
     { underscored: true }
   );

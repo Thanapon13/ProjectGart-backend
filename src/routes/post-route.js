@@ -7,6 +7,18 @@ const commentController = require("../controllers/comment-controller");
 
 const router = express.Router();
 
+// router.post(
+//   "/createPost",
+//   authenticateMiddleware,
+//   upload.fields([
+//     {
+//       name: "image",
+//       maxCount: 1
+//     }
+//   ]),
+//   postController.createPost
+// );
+
 router.post(
   "/createPost",
   authenticateMiddleware,

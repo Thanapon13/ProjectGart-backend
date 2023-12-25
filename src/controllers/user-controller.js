@@ -339,11 +339,39 @@ exports.deleteUser = async (req, res, next) => {
 
 exports.updateStatusBanUser = async (req, res, next) => {
   try {
-    console.log("req.params.userId", req.params.userId);
+    const { userId } = req.params;
+    console.log("userId:", userId);
 
-    const updateStatus = {
-      status: BAN_USER
+    const adminUserId = req.user.id;
+    console.log("adminUserId", adminUserId);
+
+    const adminData = await User.findOne({
+      where: {
+        id: adminUserId
+      },
+      attributes: ["id", "firstName", "lastName", "isAdmin", "lastLoggedIn"]
+    });
+    // console.log("adminData:", adminData);
+
+    const adminLastLoggedIn = adminData.lastLoggedIn;
+    // const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+    // const oneDayInMilliseconds = 60 * 1000;
+    const oneDayInMilliseconds = 20 * 1000;
+
+    const endBanDate = new Date(
+      adminLastLoggedIn.getTime() + oneDayInMilliseconds
+    );
+    console.log("adminLastLoggedIn:", adminLastLoggedIn.toLocaleString());
+    console.log("endBanDate:", endBanDate.toLocaleString());
+
+    console.log("oneDayInMilliseconds:", oneDayInMilliseconds);
+
+    const valueUpdate = {
+      status: BAN_USER,
+      startBanDate: adminData.lastLoggedIn,
+      endBanDate: endBanDate
     };
+    console.log("valueUpdate:", valueUpdate);
 
     const existingUpdateStatus = await User.findOne({
       where: {
@@ -359,11 +387,11 @@ exports.updateStatusBanUser = async (req, res, next) => {
       createError("Already Ban User", 400);
     }
 
-    const pureUpdateStatus = JSON.parse(JSON.stringify(updateStatus));
+    const pureUpdate = JSON.parse(JSON.stringify(valueUpdate));
     // console.log("pureUpdateStatus:", pureUpdateStatus);
 
-    await User.update(pureUpdateStatus, {
-      where: { id: req.params.userId }
+    await User.update(pureUpdate, {
+      where: { id: userId }
     });
 
     res.status(201).json({ message: "Update Status Completed!!" });
@@ -411,38 +439,3 @@ exports.updateStatusShowUser = async (req, res, next) => {
     next(err);
   }
 };
-
-// exports.updateStatusShowUser = async (req, res, next) => {
-//   try {
-//     console.log("req.params.userId", req.params.userId);
-
-//     const updateStatus = {
-//       status: SHOW_USER
-//     };
-
-//     const existingUpdateStatus = await User.findOne({
-//       where: {
-//         id: req.params.userId,
-//         status: {
-//           [Op.not]: BAN_USER
-//         }
-//       }
-//     });
-//     // console.log("existingUpdateStatus:", existingUpdateStatus);
-
-//     if (existingUpdateStatus && existingUpdateStatus.status === SHOW_USER) {
-//       createError("Already Ban User", 400);
-//     }
-
-//     const pureUpdateStatus = JSON.parse(JSON.stringify(updateStatus));
-//     // console.log("pureUpdateStatus:", pureUpdateStatus);
-
-//     await User.update(pureUpdateStatus, {
-//       where: { id: req.params.userId }
-//     });
-
-//     res.status(201).json({ message: "Update Status Completed!!" });
-//   } catch (err) {
-//     next(err);
-//   }
-// };

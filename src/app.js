@@ -11,7 +11,6 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const notFoundMiddleware = require("./middlewares/not-found");
 const errorMiddleware = require("./middlewares/error");
-const authenticateMiddleware = require("./middlewares/authenticate");
 
 const authRoute = require("./routes/auth-route");
 const userRoute = require("./routes/user-route");
@@ -40,7 +39,7 @@ app.use("/user", userRoute);
 app.use("/post", postRoute);
 app.use("/tag", tagRoute);
 app.use("/follow", followRoute);
-app.use("/admin", authenticateMiddleware, adminRoute);
+app.use("/admin", adminRoute);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
