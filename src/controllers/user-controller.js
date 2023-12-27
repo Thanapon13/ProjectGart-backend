@@ -189,7 +189,10 @@ exports.getUserData = async (req, res, next) => {
         "lastName",
         "email",
         "lastLoggedIn",
-        "profileImage"
+        "profileImage",
+        "status",
+        "startBanDate",
+        "endBanDate"
       ],
       include: [
         {
@@ -394,7 +397,20 @@ exports.updateStatusBanUser = async (req, res, next) => {
       where: { id: userId }
     });
 
-    res.status(201).json({ message: "Update Status Completed!!" });
+    const userData = await User.findAll({
+      attributes: [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "lastLoggedIn",
+        "profileImage",
+        "status",
+        "startBanDate",
+        "endBanDate"
+      ]
+    });
+    res.status(201).json({ message: "Update Status Completed!!", userData });
   } catch (err) {
     next(err);
   }

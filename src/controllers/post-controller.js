@@ -12,38 +12,6 @@ const { Op } = require("sequelize");
 const { HIDE_POST, SHOW_POST } = require("../config/constant");
 const createError = require("../utils/create-error");
 
-// exports.createPost = async (req, res, next) => {
-//   try {
-//     console.log("req.body:", req.body);
-//     console.log("req.files:", req.files);
-
-//     if (!req.files || !req.files.image || req.files.image.length === 0) {
-//       return res.status(400).json({ message: "Post image is required" });
-//     }
-
-//     const postImages = [];
-//     for (let i = 0; i < req.files.image.length; i++) {
-//       const image = await cloudinary.uploaPostImage(req.files.image[i].path);
-//       console.log("image:", image);
-//       postImages.push(image);
-//       console.log("Uploaded image:", image);
-//       fs.unlinkSync(req.files.image[i].path);
-//     }
-//     const value = {
-//       image: JSON.stringify(postImages),
-//       title: req.body.title,
-//       description: req.body.description,
-//       userId: req.body.userId,
-//       tagId: req.body.tagId
-//     };
-//     console.log("Value:", value);
-//     await Post.create(value);
-//     return res.status(200).json({ message: "Successfully updated" });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
 exports.createPost = async (req, res, next) => {
   try {
     console.log("req.body:", req.body);
@@ -53,35 +21,61 @@ exports.createPost = async (req, res, next) => {
       return res.status(400).json({ message: "Post image is required" });
     }
 
-    const quantity = 4;
-
     const postImages = [];
-    for (let round = 0; round < quantity; round++) {
-      const imagesForRound = [];
-      for (let i = 0; i < req.files.image.length; i++) {
-        const image = await cloudinary.uploaPostImage(req.files.image[i].path);
-        console.log("image:", image);
-        imagesForRound.push(image);
-        console.log("Uploaded image:", image);
-        fs.unlinkSync(req.files.image[i].path);
-      }
-      postImages.push(imagesForRound);
+    for (let i = 0; i < req.files.image.length; i++) {
+      const image = await cloudinary.uploaPostImage(req.files.image[i].path);
+      console.log("image:", image);
+      postImages.push(image);
+      console.log("Uploaded image:", image);
+      fs.unlinkSync(req.files.image[i].path);
     }
-    const posts = postImages.map(imagesForRound => ({
-      image: JSON.stringify(imagesForRound),
+    const value = {
+      image: JSON.stringify(postImages),
       title: req.body.title,
       description: req.body.description,
       userId: req.body.userId,
       tagId: req.body.tagId
-    }));
+    };
     console.log("Value:", value);
-    await Promise.all(posts.map(post => Post.create(post)));
-
+    await Post.create(value);
     return res.status(200).json({ message: "Successfully updated" });
   } catch (err) {
     next(err);
   }
 };
+
+// exports.createPost = async (req, res, next) => {
+//   try {
+//     if (!req.files || !req.files.image || req.files.image.length === 0) {
+//       return res.status(400).json({ message: "Post image is required" });
+//     }
+
+//     const quantity = 4;
+
+//     for (let d = 0; d < quantity; d++) {
+//       const postImages = [];
+
+//       for (let i = 0; i < req?.files?.image?.length; i++) {
+//         const image = await cloudinary.uploaPostImage(req.files.image[i].path);
+//         postImages.push(image);
+//       }
+
+//       const value = {
+//         image: JSON.stringify(postImages),
+//         title: req.body.title,
+//         description: req.body.description,
+//         userId: req.body.userId,
+//         tagId: req.body.tagId
+//       };
+
+//       await Post.create(value);
+//     }
+
+//     return res.status(200).json({ message: "Successfully created" });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 exports.getCreatePost = async (req, res, next) => {
   try {
