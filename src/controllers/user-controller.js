@@ -104,8 +104,9 @@ exports.updateUserInfoPassword = async (req, res, next) => {
     console.log("confirmPassword:", confirmPassword);
 
     const userId = req.user.id;
+    // console.log("userId:", userId);
     const user = await User.findByPk(userId);
-    console.log("user:", user);
+    // console.log("user:", user);
 
     // Check if the user exists
     if (!user) {
@@ -114,9 +115,12 @@ exports.updateUserInfoPassword = async (req, res, next) => {
 
     // Compare the old password with the hashed password stored in the database
     const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    // console.log("isPasswordMatch:", isPasswordMatch);
 
     if (!isPasswordMatch) {
-      return res.status(401).json({ message: "Invalid old password" });
+      return res
+        .status(401)
+        .json({ message: "The password does not match the current password." });
     }
 
     // Check if the new password and confirm password match
@@ -128,6 +132,7 @@ exports.updateUserInfoPassword = async (req, res, next) => {
 
     // Hash the new password before updating the user's password in the database
     const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+    // console.log("hashedNewPassword:", hashedNewPassword);
 
     // Update the user's password with the new hashed password
     user.password = hashedNewPassword;
@@ -144,10 +149,10 @@ exports.getUserInfoById = async (req, res, next) => {
     const user = await User.findOne({
       where: {
         id: req.params.userId
-      },
-      attributes: {
-        exclude: ["password"]
       }
+      // attributes: {
+      //   exclude: ["password"]
+      // }
     });
 
     if (!user) {

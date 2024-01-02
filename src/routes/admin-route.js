@@ -4,6 +4,7 @@ const postController = require("../controllers/post-controller");
 const userController = require("../controllers/user-controller");
 const adminController = require("../controllers/admin-controller");
 const authenticateMiddleware = require("../middlewares/authenticate");
+const commentController = require("../controllers/comment-controller");
 
 const router = express.Router();
 
@@ -57,5 +58,13 @@ router.delete(
   authenticateMiddleware,
   adminController.deleteRestoredPost
 );
+
+router.delete(
+  "/comments",
+  authenticateMiddleware,
+  commentController.adminDeleteCommentId
+);
+
+router.get("/getComment", commentController.getComment);
 
 module.exports = router;

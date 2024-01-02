@@ -21,8 +21,11 @@ router.patch(
 );
 
 router.get("/users", userController.getUserData);
+
 router.get("/:userId", userController.getUserInfoById);
+
 router.patch("/info", authenticateMiddleware, userController.updateUserInfo);
+
 router.patch(
   "/infoPassword",
   authenticateMiddleware,

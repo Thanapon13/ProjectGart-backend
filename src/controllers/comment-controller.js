@@ -1,4 +1,4 @@
-const { Comment } = require("../models");
+const { Comment, Post, User } = require("../models");
 
 exports.createComment = async (req, res, next) => {
   try {
@@ -47,8 +47,8 @@ exports.editComment = async (req, res, next) => {
 exports.deleteCommentId = async (req, res, next) => {
   try {
     console.log("req.params.commentId:", req.params.commentId);
-    console.log("req.user.id:", req.user);
-
+    console.log("req.user.id:", req.user.id);
+    console.log("body:", req.body);
     const commentToDelete = await Comment.findOne({
       where: {
         id: req.params.commentId,
@@ -65,6 +65,42 @@ exports.deleteCommentId = async (req, res, next) => {
     await commentToDelete.destroy();
 
     res.status(200).json({ message: "Delete success" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.adminDeleteCommentId = async (req, res, next) => {
+  try {
+    console.log("body:", req.body);
+
+    const commentToDelete = await Comment.findOne({
+      where: {
+        id: req.body.id,
+        userId: req.body.userId
+      }
+    });
+
+    if (!commentToDelete) {
+      return res
+        .status(404)
+        .json({ message: "Comment not found for the user." });
+    }
+
+    await commentToDelete.destroy();
+
+    res.status(200).json({ message: "Delete success" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getComment = async (req, res, next) => {
+  try {
+    const comments = await Comment.findAll({
+      include: [{ model: Post }, { model: User }]
+    });
+    res.status(200).json({ comments });
   } catch (err) {
     next(err);
   }
